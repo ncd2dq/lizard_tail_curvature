@@ -100,6 +100,7 @@ class ImageDownloader(object):
         self.blank_space[0] = avg
         self.blank_space[1] = std
 
+
     def sampleTail(self, img_path):
         '''
         Takes in a sample tail picture to determine an avg/std pixel brightness, it will use this later
@@ -132,8 +133,14 @@ class ImageDownloader(object):
                 pixel = rgb.getpixel((x, y))
                 brightness = self.getBrightness(pixel)
 
+                #testing
+                if(x == 0 and y == 0):
+                    print(self.blank_space[0] + self.blank_space[1] * blank_space_sensitivity)
+                    print(brightness)
+                    print(self.blank_space[0] - self.blank_space[1] * blank_space_sensitivity)
+
                 if (brightness > self.blank_space[0] + self.blank_space[1] * blank_space_sensitivity) or (
-                    brightness < self.blank_space[0] + self.blank_space[1] * blank_space_sensitivity):
+                    brightness < self.blank_space[0] - self.blank_space[1] * blank_space_sensitivity):
                     coordinate_dict['x'].append(x)
                     coordinate_dict['y'].append(y)
                     break
@@ -157,10 +164,15 @@ class ImageDownloader(object):
 
     def runOnSampleImage(self):
         blank_space_path = input('Please enter blank space sample file path: ')
-        test_image_path = input('Please enter test image file path: ')
-
         self.sampleBlankSpace(blank_space_path)
-        coord_dict = self.recordCoordinates(test_image_path)
+        print('\nBackground Avg: {}\nBackground Std: {}'.format(self.blank_space[0], self.blank_space[1]))
+
+        test_image_path = input('\nPlease enter test image file path: ')
+        sensitivity = input('\nSelect sensitivity level (floating point)\nUniform backgrounds need higher sensitivity: ')
+
+        sensitivity = float(sensitivity)
+
+        coord_dict = self.recordCoordinates(test_image_path, blank_space_sensitivity=sensitivity)
         self.plotSampleImg(coord_dict)
 
 
