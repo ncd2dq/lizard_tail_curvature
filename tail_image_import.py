@@ -14,6 +14,7 @@ class ImageDownloader(object):
     def __init__(self):
         self.data_list = [] # [  {'x':[], 'y':[]}  ,  {'x':[], 'y':[]}  ]
         self.blank_space = [0, 0] # Avg, Std
+        self.tail_space = [0, 0] # Avg, Std
 
     def getBrightness(self, pixel):
         '''
@@ -101,14 +102,16 @@ class ImageDownloader(object):
         self.blank_space[1] = std
 
 
-    def sampleTail(self, img_path):
+    def sampleTailSpace(self, img_path):
         '''
         Takes in a sample tail picture to determine an avg/std pixel brightness, it will use this later
         to determine if a pixel IS part of the tail
 
         this may slow it down too much?
         '''
-        pass
+        avg, std = self.determineAvgStd(self.imageBrightnessIterator(img_path))
+        self.tail_space[0] = avg
+        self.tail_space[1] = std
 
 
     def recordCoordinates(self, img_path, blank_space_sensitivity=2):
@@ -163,13 +166,17 @@ class ImageDownloader(object):
     #
 
     def runOnSampleImage(self):
-        blank_space_path = input('Please enter blank space sample file path: ')
+        blank_space_path = input('\nPlease enter blank space sample file path: ')
         self.sampleBlankSpace(blank_space_path)
         print('\nBackground Avg: {}\nBackground Std: {}'.format(self.blank_space[0], self.blank_space[1]))
 
-        test_image_path = input('\nPlease enter test image file path: ')
-        sensitivity = input('\nSelect sensitivity level (floating point)\nUniform backgrounds need higher sensitivity: ')
+        tail_space_path = input('\nPlease enter tail space sample file path: ')
+        self.sampleTailSpace(tail_space_path)
+        print('\nBackground Avg: {}\nBackground Std: {}'.format(self.tail_space[0], self.tail_space[1]))
 
+        test_image_path = input('\nPlease enter test image file path: ')
+
+        sensitivity = input('\nSelect sensitivity level (floating point)\nUniform backgrounds need higher sensitivity: ')
         sensitivity = float(sensitivity)
 
         coord_dict = self.recordCoordinates(test_image_path, blank_space_sensitivity=sensitivity)
@@ -185,3 +192,16 @@ if __name__ == '__main__':
     imgObj.runOnSampleImage()
 
     sleep(10)
+
+
+'''
+Add new methods:
+
+instead of just selecting a threshold, allow use to set an upper/lower limit
+or maybe just lower, or maybe just upper
+
+or allow them to use the tail_space as the determining factor instead of the background
+
+additionally, plot a brightness value histagram of the desired factor (background or tail) to help the user select
+the bounds
+'''
